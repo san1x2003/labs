@@ -1,139 +1,272 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
 
-namespace CALCULATOR
+namespace C_APP//<<-название проги
 {
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            while (true) 
-            {
-                Console.Write("Введите выражение: "); 
-                Console.WriteLine(ReversePolishNotation.Calculate(Console.ReadLine())); 
-            }
-        }
-    }
-    class ReversePolishNotation
-    {
-        static private bool IsDelimeter(char c)
-        {
-            if ((" =".IndexOf(c) != -1))
-                return true;
-            return false;
-        }
-        static private bool IsOperator(char с)
-        {
-            if (("+-/*".IndexOf(с) != -1))
-                return true;
-            return false;
-        }
-        static private byte GetPriority(char s)
-        {
-            switch (s)
-            {          
-                case '+': return 1;
-                case '-': return 2;
-                case '*': return 3;
-                case '/': return 3;
-                default: return 4;
-            }
-        }
-        static public double Calculate(string input)
-        {
-            string output = ConvertExpression(input); 
-            double result = Counting(output); 
-            return result; 
-        }
-        static private string ConvertExpression(string input)
-        {
-            string output = string.Empty; 
-            Stack<char> operStack = new Stack<char>(); 
 
-            for (int i = 0; i < input.Length; i++)
-            {
-             
-                if (IsDelimeter(input[i]))
-                    continue;
 
-                
-                if (Char.IsDigit(input[i])) 
-                {
-                    
-                    while (!IsDelimeter(input[i]) && !IsOperator(input[i]))
-                    {
-                        output += input[i]; 
-                        i++; 
+	class Program
+	{
+		public class Calc
+		{
+			// Универсальная операция
+			abstract class Operation
+			{
+				public abstract float Eval();
+			}
 
-                        if (i == input.Length) break; 
-                    }
+			// Просто число
+			class Number : Operation
+			{
+				public Number(float f)
+				{ 
+					value = f; 
+				}
+				public override float Eval() 
+				{ 
+					return value;
+				}
 
-                    output += " ";
-                    i--; 
-                }
+				private float value;
+			}
 
-                
-                if (IsOperator(input[i])) 
-                {
-                    if (operStack.Count > 0) 
-                        if (GetPriority(input[i]) <= GetPriority(operStack.Peek())) 
-                            output += operStack.Pop().ToString() + " "; 
-                    operStack.Push(char.Parse(input[i].ToString())); 
+			// Один операнд
+			abstract class Unary : Operation
+			{
+				public Unary(Operation op) 
+				{ 
+					one = op; 
+				}
 
-                }
-            }
+				protected Operation one;
+			}
 
-            
-            while (operStack.Count > 0)
-                output += operStack.Pop() + " ";
+			// Два операнда
+			abstract class Binary : Operation
+			{
+				public Binary(Operation l, Operation r) 
+				{ 
+					left = l; right = r;
+				}
 
-            return output; 
-        }
-        static private double Counting(string input)
-        {
-            double result = 0;
-            Stack<double> temp = new Stack<double>(); 
+				protected Operation left, right;
+			}
 
-            for (int i = 0; i < input.Length; i++) 
-            {
-                
-                if (Char.IsDigit(input[i]))
-                {
-                    string a = string.Empty;
+			// Одинокий минус
+			class Negation : Unary
+			{
+				public Negation(Operation n) : base(n) 
+				{ 
+				
+				}
+				public override float Eval() 
+				{ 
+					return -one.Eval(); 
+				}
+			}
 
-                    while (!IsDelimeter(input[i]) && !IsOperator(input[i])) 
-                    {
-                        a += input[i]; 
-                        i++;
-                        if (i == input.Length) break;
-                    }
-                    temp.Push(double.Parse(a)); 
-                    i--;
-                }
-                else if (IsOperator(input[i])) 
-                {
-                  
-                    double a = temp.Pop();
-                    double b = temp.Pop();
+			// Сложение
+			class Plus : Binary
+			{
+				public Plus(Operation l, Operation r) : base(l, r)
+				{ 
+				
+				}
+				public override float Eval() 
+				{
+					return left.Eval() + right.Eval(); 
+				}
+			}
 
-                    switch (input[i]) 
-                    {
-                        case
-                    '+':
-                            result = b + a; break;
-                        case '-': result = b - a; break;
-                        case '*': result = b * a; break;
-                        case '/':
-                            result = b /
-                            a; break;
+			// Вычитание
+			class Minus : Binary
+			{
+				public Minus(Operation l, Operation r) : base(l, r) 
+				{ 
+				
+				}
+				public override float Eval() 
+				{ 
+					return left.Eval() - right.Eval(); 
+				}
+			}
 
-                    }
-                    temp.Push(result); 
-                }
-            }
-            return temp.Peek(); 
-        }
-    }
+			// Умножение
+			class Multiply : Binary
+			{
+				public Multiply(Operation l, Operation r) : base(l, r) 
+				{ 
+				
+				}
+				public override float Eval() 
+				{
+					return left.Eval() * right.Eval(); 
+				}
+			}
+
+			// Деление
+			class Divide : Binary
+			{
+				public Divide(Operation l, Operation r) : base(l, r) 
+				{ 
+				
+				}
+				public override float Eval()
+				{
+					float right_eval = right.Eval();
+					if (right_eval == 0.0f)
+					{
+						System.Console.WriteLine("Devide by zero");
+					}	
+					return (right_eval != 0.0f) ? (left.Eval() / right_eval) : float.MaxValue;
+				}
+			}
+
+			class Expression
+			{
+				public Expression(string s) 
+				{ 
+					source = s; 
+				}
+
+				public float Calc()
+				{
+					pos = 0;
+					Operation root = Parse0();
+					return (root != null) ? root.Eval() : 0.0f;
+				}
+
+				// Низкий приоритет: сложение, вычитание
+				private Operation Parse0()
+				{
+					Operation result = Parse1();
+
+					for ( ; ; )
+					{
+						if (Match('+'))
+						{
+							result = new Plus(result, Parse1());
+						}
+						else if (Match('-'))
+						{
+							result = new Minus(result, Parse1());
+						}
+						else
+						{ 
+							return result; 
+						}
+							
+					}
+				}
+
+				// Средний приоритет: умножение, деление
+				private Operation Parse1()
+				{
+					Operation result = Parse2();
+					for (; ; )
+					{
+						if (Match('*'))
+						{
+							result = new Multiply(result, Parse2());
+						}
+						else if (Match('/'))
+						{
+							result = new Divide(result, Parse2());
+						}
+						else 
+						{ 
+							return result;
+						} 
+					}
+				}
+
+				// Высокий приоритет: одинокий минус, скобки, число
+				private Operation Parse2()
+				{
+					Operation result = null;
+					
+					if (Match('-'))
+					{
+						result = new Negation(Parse0());
+					}
+					else if (Match('('))
+					{
+						result = Parse0();
+						if (!Match(')'))
+						{
+							System.Console.WriteLine("Missing ')'");
+						}		
+					}
+					else
+					{
+						// парсинг числа
+						float val = 0.0f;
+						int start = pos;
+						while (pos < source.Length && (char.IsDigit(source[pos]) || source[pos] == '.' || source[pos] == 'e'))
+						{ 
+							++pos;
+						}
+						
+
+						try 
+						{ 
+							val = float.Parse(source.Substring(start, pos - start)); 
+						}
+						catch
+						{ 
+							System.Console.WriteLine("Can't parse '" + source.Substring(start) + "'");
+						}
+						result = new Number(val);
+
+					}
+					return result;
+				}
+
+				// Поиск символа в строке
+				private bool Match(char ch)
+				{
+					if (pos >= source.Length) 
+					{
+						return false;
+					}
+					
+					while (source[pos] == ' ')
+					{
+						++pos;             // пропуск пробелов
+					}
+
+
+					if (source[pos] == ch)
+					{
+						++pos;
+						return true; // нашли что искали?
+					}
+					else
+					{
+						return false;
+					}
+				}
+
+				private string source;     // исходная строчка
+				private int pos;        // текущая позиция
+			}
+
+			public static void Main()
+			{
+				while (true)
+				{
+					System.Console.Clear();
+					System.Console.WriteLine("Ведите пример:");
+					string buf = System.Console.ReadLine();
+
+					Expression expr = new Expression(buf);
+					Console.WriteLine("Решение: ");
+					System.Console.WriteLine(expr.Calc().ToString("g"));
+					System.Console.ReadKey();
+				}
+
+				
+			}
+		}
+	}
 }
