@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace C_APP//<<-название проги
+namespace C_APP
 {
 
 
@@ -9,13 +9,13 @@ namespace C_APP//<<-название проги
 	{
 		public class Calc
 		{
-			// Универсальная операция
+			
 			abstract class Operation
 			{
 				public abstract float Eval();
 			}
 
-			// Просто число
+			
 			class Number : Operation
 			{
 				public Number(float f)
@@ -30,7 +30,7 @@ namespace C_APP//<<-название проги
 				private float value;
 			}
 
-			// Один операнд
+			
 			abstract class Unary : Operation
 			{
 				public Unary(Operation op) 
@@ -41,7 +41,7 @@ namespace C_APP//<<-название проги
 				protected Operation one;
 			}
 
-			// Два операнда
+			
 			abstract class Binary : Operation
 			{
 				public Binary(Operation l, Operation r) 
@@ -52,7 +52,7 @@ namespace C_APP//<<-название проги
 				protected Operation left, right;
 			}
 
-			// Одинокий минус
+			
 			class Negation : Unary
 			{
 				public Negation(Operation n) : base(n) 
@@ -65,7 +65,7 @@ namespace C_APP//<<-название проги
 				}
 			}
 
-			// Сложение
+			
 			class Plus : Binary
 			{
 				public Plus(Operation l, Operation r) : base(l, r)
@@ -78,7 +78,7 @@ namespace C_APP//<<-название проги
 				}
 			}
 
-			// Вычитание
+		
 			class Minus : Binary
 			{
 				public Minus(Operation l, Operation r) : base(l, r) 
@@ -91,7 +91,7 @@ namespace C_APP//<<-название проги
 				}
 			}
 
-			// Умножение
+			
 			class Multiply : Binary
 			{
 				public Multiply(Operation l, Operation r) : base(l, r) 
@@ -104,7 +104,7 @@ namespace C_APP//<<-название проги
 				}
 			}
 
-			// Деление
+			
 			class Divide : Binary
 			{
 				public Divide(Operation l, Operation r) : base(l, r) 
@@ -136,7 +136,7 @@ namespace C_APP//<<-название проги
 					return (root != null) ? root.Eval() : 0.0f;
 				}
 
-				// Низкий приоритет: сложение, вычитание
+				
 				private Operation Parse0()
 				{
 					Operation result = Parse1();
@@ -159,7 +159,7 @@ namespace C_APP//<<-название проги
 					}
 				}
 
-				// Средний приоритет: умножение, деление
+				
 				private Operation Parse1()
 				{
 					Operation result = Parse2();
@@ -180,7 +180,7 @@ namespace C_APP//<<-название проги
 					}
 				}
 
-				// Высокий приоритет: одинокий минус, скобки, число
+				
 				private Operation Parse2()
 				{
 					Operation result = null;
@@ -199,7 +199,7 @@ namespace C_APP//<<-название проги
 					}
 					else
 					{
-						// парсинг числа
+						
 						float val = 0.0f;
 						int start = pos;
 						while (pos < source.Length && (char.IsDigit(source[pos]) || source[pos] == '.' || source[pos] == 'e'))
@@ -222,7 +222,7 @@ namespace C_APP//<<-название проги
 					return result;
 				}
 
-				// Поиск символа в строке
+				
 				private bool Match(char ch)
 				{
 					if (pos >= source.Length) 
@@ -232,14 +232,14 @@ namespace C_APP//<<-название проги
 					
 					while (source[pos] == ' ')
 					{
-						++pos;             // пропуск пробелов
+						++pos;             
 					}
 
 
 					if (source[pos] == ch)
 					{
 						++pos;
-						return true; // нашли что искали?
+						return true; 
 					}
 					else
 					{
@@ -247,8 +247,8 @@ namespace C_APP//<<-название проги
 					}
 				}
 
-				private string source;     // исходная строчка
-				private int pos;        // текущая позиция
+				private string source;     
+				private int pos;        
 			}
 
 			public static void Main()
