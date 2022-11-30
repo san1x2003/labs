@@ -1,272 +1,157 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
+using System.Numerics;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
-namespace C_APP
+namespace SerializeBasic
 {
 
+    public class Zakaz
+    {
+        public int? Id_post { get; set; }
 
-	class Program
-	{
-		public class Calc
-		{
-			
-			abstract class Operation
-			{
-				public abstract float Eval();
-			}
+        public int? Id_sklada { get; set; }
 
-			
-			class Number : Operation
-			{
-				public Number(float f)
-				{ 
-					value = f; 
-				}
-				public override float Eval() 
-				{ 
-					return value;
-				}
+        public int? Id_sotrydnik { get; set; }
 
-				private float value;
-			}
+        public int? Id_product { get; set; }
 
-			
-			abstract class Unary : Operation
-			{
-				public Unary(Operation op) 
-				{ 
-					one = op; 
-				}
+        public int? Id_zakaza { get; set; }
 
-				protected Operation one;
-			}
+        public int? Number_contract { get; set; }
 
-			
-			abstract class Binary : Operation
-			{
-				public Binary(Operation l, Operation r) 
-				{ 
-					left = l; right = r;
-				}
+        public DateTime? Date_of_execution { get; set; }
 
-				protected Operation left, right;
-			}
+        public string? Adress { get; set; }
 
-			
-			class Negation : Unary
-			{
-				public Negation(Operation n) : base(n) 
-				{ 
-				
-				}
-				public override float Eval() 
-				{ 
-					return -one.Eval(); 
-				}
-			}
+        public klient Id_klient { get; set; }
 
-			
-			class Plus : Binary
-			{
-				public Plus(Operation l, Operation r) : base(l, r)
-				{ 
-				
-				}
-				public override float Eval() 
-				{
-					return left.Eval() + right.Eval(); 
-				}
-			}
+        public Zakaz() { }
 
-		
-			class Minus : Binary
-			{
-				public Minus(Operation l, Operation r) : base(l, r) 
-				{ 
-				
-				}
-				public override float Eval() 
-				{ 
-					return left.Eval() - right.Eval(); 
-				}
-			}
+        public Zakaz (int id_post, int id_sklada, int id_sotrydnik, int id_product, int id_zakaza, int number_contract, DateTime date_of_execution, string adress)
+        {
+            Id_post = id_post;
+            Id_sklada = id_sklada;
+            Id_sotrydnik = id_sotrydnik;
+            Id_product = id_product;
+            Id_zakaza = id_zakaza;
+            Number_contract = number_contract;
+            Date_of_execution = date_of_execution;
+            Adress = adress;
+            
 
-			
-			class Multiply : Binary
-			{
-				public Multiply(Operation l, Operation r) : base(l, r) 
-				{ 
-				
-				}
-				public override float Eval() 
-				{
-					return left.Eval() * right.Eval(); 
-				}
-			}
+        }
+    }
+    public class klient
+    {
+        public int Id_klient { get; set; }
+        public string Email { get; set; }
+        public string Phone_number { get; set; }
+        public string Adress { get; set; }
 
-			
-			class Divide : Binary
-			{
-				public Divide(Operation l, Operation r) : base(l, r) 
-				{ 
-				
-				}
-				public override float Eval()
-				{
-					float right_eval = right.Eval();
-					if (right_eval == 0.0f)
-					{
-						System.Console.WriteLine("Devide by zero");
-					}	
-					return (right_eval != 0.0f) ? (left.Eval() / right_eval) : float.MaxValue;
-				}
-			}
+        public klient() { }
 
-			class Expression
-			{
-				public Expression(string s) 
-				{ 
-					source = s; 
-				}
-
-				public float Calc()
-				{
-					pos = 0;
-					Operation root = Parse0();
-					return (root != null) ? root.Eval() : 0.0f;
-				}
-
-				
-				private Operation Parse0()
-				{
-					Operation result = Parse1();
-
-					for ( ; ; )
-					{
-						if (Match('+'))
-						{
-							result = new Plus(result, Parse1());
-						}
-						else if (Match('-'))
-						{
-							result = new Minus(result, Parse1());
-						}
-						else
-						{ 
-							return result; 
-						}
-							
-					}
-				}
-
-				
-				private Operation Parse1()
-				{
-					Operation result = Parse2();
-					for (; ; )
-					{
-						if (Match('*'))
-						{
-							result = new Multiply(result, Parse2());
-						}
-						else if (Match('/'))
-						{
-							result = new Divide(result, Parse2());
-						}
-						else 
-						{ 
-							return result;
-						} 
-					}
-				}
-
-				
-				private Operation Parse2()
-				{
-					Operation result = null;
-					
-					if (Match('-'))
-					{
-						result = new Negation(Parse0());
-					}
-					else if (Match('('))
-					{
-						result = Parse0();
-						if (!Match(')'))
-						{
-							System.Console.WriteLine("Missing ')'");
-						}		
-					}
-					else
-					{
-						
-						float val = 0.0f;
-						int start = pos;
-						while (pos < source.Length && (char.IsDigit(source[pos]) || source[pos] == '.' || source[pos] == 'e'))
-						{ 
-							++pos;
-						}
-						
-
-						try 
-						{ 
-							val = float.Parse(source.Substring(start, pos - start)); 
-						}
-						catch
-						{ 
-							System.Console.WriteLine("Can't parse '" + source.Substring(start) + "'");
-						}
-						result = new Number(val);
-
-					}
-					return result;
-				}
-
-				
-				private bool Match(char ch)
-				{
-					if (pos >= source.Length) 
-					{
-						return false;
-					}
-					
-					while (source[pos] == ' ')
-					{
-						++pos;             
-					}
+        public klient (int id_klient, string email, string phone_number, string adress)
+        {
+            Id_klient = id_klient;
+            Email = email;
+            Phone_number = phone_number;
+            Adress = adress;
+        }
+    }
+    public class JsonHandler<T> where T : class
+    {
+        private string fileName;
+        JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
 
 
-					if (source[pos] == ch)
-					{
-						++pos;
-						return true; 
-					}
-					else
-					{
-						return false;
-					}
-				}
+        public JsonHandler() { }
 
-				private string source;     
-				private int pos;        
-			}
+        public JsonHandler(string fileName)
+        {
+            this.fileName = fileName;
+        }
 
-			public static void Main()
-			{
-				while (true)
-				{
-					System.Console.Clear();
-					System.Console.WriteLine("Ведите пример:");
-					string buf = System.Console.ReadLine();
 
-					Expression expr = new Expression(buf);
-					Console.WriteLine("Решение: ");
-					System.Console.WriteLine(expr.Calc().ToString("g"));
-					System.Console.ReadKey();
-				}
+        public void SetFileName(string fileName)
+        {
+            this.fileName = fileName;
+        }
 
-				
-			}
-		}
-	}
+        public void Write(List<T> list)
+        {
+            string jsonString = JsonSerializer.Serialize(list, options);
+
+            if (new FileInfo(fileName).Length == 0)
+            {
+                File.WriteAllText(fileName, jsonString);
+            }
+            else
+            {
+                Console.WriteLine("Specified path file is not empty");
+            }
+        }
+
+        public void Delete()
+        {
+            File.WriteAllText(fileName, string.Empty);
+        }
+
+        public void Rewrite(List<T> list)
+        {
+            string jsonString = JsonSerializer.Serialize(list, options);
+
+            File.WriteAllText(fileName, jsonString);
+        }
+
+        public void Read(ref List<T> list)
+        {
+            if (File.Exists(fileName))
+            {
+                if (new FileInfo(fileName).Length != 0)
+                {
+                    string jsonString = File.ReadAllText(fileName);
+                    list = JsonSerializer.Deserialize<List<T>>(jsonString);
+                }
+                else
+                {
+                    Console.WriteLine("Specified path file is empty");
+                }
+            }
+        }
+
+        public void OutputJsonContents()
+        {
+            string jsonString = File.ReadAllText(fileName);
+
+            Console.WriteLine(jsonString);
+        }
+
+        public void OutputSerializedList(List<T> list)
+        {
+            Console.WriteLine(JsonSerializer.Serialize(list, options));
+        }
+    }
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            List<Zakaz> partsList = new List<Zakaz>();
+
+            JsonHandler<Zakaz> partsHandler = new JsonHandler<Zakaz>("partsFile.json");
+
+            partsList.Add(new Zakaz(12,21,34,25,65,20324,"(2,3,2022)","byryzova_21", new klient(21, "popov@mail.ru", "89913456789", "byryzova_34")));
+            partsList.Add(new Zakaz(22, 31, 34, 25, 66, 54344, "(5,2,2022)", "sobornya_54", new klient(21, "solidn@mail.ru", "89975656789", "byryzova_21")));
+            partsList.Add(new Zakaz(42, 41, 76, 56, 35, 32334, "(1,5,2022)", "lenina_2",  new klient(21, "vasyliy@mail.ru", "89913454785", "byryzova_6")));
+            partsList.Remove(new Zakaz(62, 41, 14, 55, 75, 53324, "(5,1,2022)", "gorkova_6", new klient(21, "tri254@mail.ru", "89975646789", "konova_4")));
+
+
+            partsHandler.Rewrite(partsList);
+            partsHandler.OutputJsonContents();
+        }
+
+    }
+
 }
